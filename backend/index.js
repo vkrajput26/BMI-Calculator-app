@@ -5,6 +5,7 @@ const {connection}=require("./config/db")
 const {UserModel} =require("./models/UserModel")
 const jwt = require("jsonwebtoken");
 const { authentication } = require("./middlewares/authentication");
+const { BMIModel } = require("./models/BMIModel");
 const app = express()
 
 require("dotenv").config()
@@ -75,6 +76,31 @@ app.post("/login", async(req,res)=>{
     const {name,email}=user
     res.send({name,email})
  })
+
+ app.post("/calculate",authentication, async (req,res)=>{
+ const {height,weight,user_id}=req.body;
+ const height_in_m=Number(height)*0.3048
+ const BMI =Number(weight)/(height_in_m)**2
+ const new_bmi = new BMIModel({
+    BMI,
+    height : height_in_m,
+    weight,
+    user_id
+ })
+ await new_bmi.save()
+ res.send({BMI})
+ })
+
+ app.get("/getCalculate",authentication, async (req,res)=>{
+    const {user_id}=req.body;
+    const all_bmi_data = await BMIModel.find({user_id:user_id})
+    
+  
+    res.send({history:all_bmi_data})
+    })
+
+
+
 
 app.listen(8000, async() => {
     try{
