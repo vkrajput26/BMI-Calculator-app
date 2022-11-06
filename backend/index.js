@@ -3,7 +3,8 @@ const express = require("express")
 const bcrypt = require('bcrypt');
 const {connection}=require("./config/db")
 const {UserModel} =require("./models/UserModel")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const { authentication } = require("./middlewares/authentication");
 const app = express()
 
 require("dotenv").config()
@@ -66,6 +67,14 @@ app.post("/login", async(req,res)=>{
         }
     })
 })
+
+ app.get("/getProfiler", authentication, async (req,res)=>{
+    const {user_id}=req.body
+    const user= await UserModel.findOne({_id:user_id})
+    console.log(user)
+    const {name,email}=user
+    res.send({name,email})
+ })
 
 app.listen(8000, async() => {
     try{
