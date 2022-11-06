@@ -7,7 +7,8 @@ const jwt = require("jsonwebtoken");
 const { authentication } = require("./middlewares/authentication");
 const { BMIModel } = require("./models/BMIModel");
 const app = express()
-
+const cors =require("cors")
+app.use(cors())
 require("dotenv").config()
 app.use(express.json())
 
@@ -21,10 +22,10 @@ app.post("/signup",async(req,res)=>{
  
     const isUser= await UserModel.findOne({email})
     if(isUser){
-        res.send("user already exists , please try to logging up")
+        res.send("user already exists ,  please try to logging up")
     }
 
-    bcrypt.hash(password, 4,async function(err,hash) {
+    else{  bcrypt.hash(password, 4,async function(err,hash) {
       if(err){
         res.send("please try again")
       }
@@ -37,13 +38,14 @@ app.post("/signup",async(req,res)=>{
       })
       try{
          await new_user.save()
-         res.send("sign up successfully")
+         res.send({"msg": "sign up successfully"})
       }
       catch(err){
-          res.send("error occur")
+          res.send({ "msg" : "error occur"})
       }
        
     });
+}
 })
 
 
@@ -57,14 +59,14 @@ app.post("/login", async(req,res)=>{
     console.log(user)
     bcrypt.compare(password,hash_password,function(err,result){
         if(err){
-            res.send("try agai later")
+            res.send({ "msg":"try agai later"})
         }
         if(result){
             var token = jwt.sign({user_id}, process.env.SECRET_KEY);
             res.send({msg:"login successfull",token})
         }
         else{
-            res.send("login failed")
+            res.send({"msg":"login failed"})
         }
     })
 })
